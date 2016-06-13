@@ -75,8 +75,9 @@ class Actions(object):
 
         print('imagesnap recording frame to ' + OUTPATH)
         # take a photo and put it in the output directory
-        call(['imagesnap', '-w', str(WARMUP_TIME), '-q', OUTPATH],
+        snap = call(['imagesnap', '-w', str(WARMUP_TIME), OUTPATH],
              stdout=DEVNULL, stderr=STDOUT)
+        print('Errors: ' + snap)
         print('...done.')
 
     @staticmethod
