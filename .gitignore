@@ -3,5 +3,6 @@ venv/
 
 # cpython
 *.pyc
-*/*.pyc
-wu.json
+
+# the credentials file
+*.json
