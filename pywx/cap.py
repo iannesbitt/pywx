@@ -112,14 +112,14 @@ class Actions(object):
         wu_conn = FTP('webcam.wunderground.com')
         print('Using login credentials for user: ' + data["user"])
         login = wu_conn.login(data["user"], data["pswd"])
-        if login.startswith('230'):
+        if login[0] == '2':
             print('Login accepted. Uploading...')
             upl = wu_conn.storbinary('STOR image.jpg', open(OUTPATH, 'rb'))
-            if upl.startswith('226'):
+            if upl[0] == '2':
                 print('Upload success.')
             else:
                 print('Upload failed.')
-        elif login.startswith('430'):
+        elif login[0] == '5':
             print('Login rejected. Adjust username and password.')
         else:
             print('Status:' + login)
