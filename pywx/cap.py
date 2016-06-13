@@ -33,7 +33,7 @@ WARMUP_TIME = 4
 OUTPUT_DIR = '/tmp/wx/'
 IMAGE_NAME = 'image.jpg'
 OUTPATH = os.path.join(OUTPUT_DIR, IMAGE_NAME)
-BASEPATH = os.path.dirname(__file__)
+BASEPATH = os.path.basename(__file__)
 JSONPATH = os.path.abspath(os.path.join(BASEPATH, "..", "..", "wu.json"))
 
 
@@ -143,7 +143,6 @@ class Actions(object):
 
         if err_name != '':
             try:
-                #Actions.upload()
-                pass
+                Actions.upload()
             except Exception as err_name: # pylint: disable=W0703
                 print(err_name)
