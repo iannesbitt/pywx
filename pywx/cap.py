@@ -23,13 +23,13 @@ from subprocess import call, STDOUT
 try:
     from subprocess import DEVNULL
 except ImportError:
-    DEVNULL = open(os.devnull, 'wb')
+    DEVNULL = open(os.devnull, 'w')
 
 WARMUP_TIME = 4
 OUTPUT_DIR = '/tmp/wx/'
 IMAGE_NAME = 'image.jpg'
 OUTPATH = os.path.join(OUTPUT_DIR, IMAGE_NAME)
-BASEPATH = os.path.basename(__file__)
+BASEPATH = os.path.dirname(os.path.abspath(__file__))
 JSONPATH = os.path.abspath(os.path.join(BASEPATH, "..", "settings.json"))
 NOW = datetime.now()
 YEAR = NOW.strftime('%Y')
@@ -64,11 +64,11 @@ class CredentialError(Exception):
 
 try:
     with open(JSONPATH) as j:
-        data = json.load(j)
-    DEVICE = data["device"]
+        DATA = json.load(j)
+    DEVICE = DATA["device"]
 except IOError as io_err:
     print("Could not find or could not open JSON at " + JSONPATH)
-    raise PathError("You must have a JSON named wu.json in the top level directory.")
+    raise PathError("You must have a JSON named settings.json in the top level directory.")
 
 
 class Actions(object):
@@ -89,8 +89,8 @@ class Actions(object):
 
         print('imagesnap recording frame to ' + OUTPATH + ' using ' + DEVICE)
         # take a photo and put it in the output directory
-        snap = call(['imagesnap', '-w', str(WARMUP_TIME), '-q', '-d', DEVICE, OUTPATH],
-             stdout=DEVNULL, stderr=STDOUT)
+        snap = call(['/opt/local/bin/imagesnap', '-w', str(WARMUP_TIME), '-q', '-d', DEVICE, OUTPATH],
+                    stdout=DEVNULL, stderr=STDOUT)
         print('Errors: ' + str(snap))
         print('...done.')
 
@@ -112,7 +112,7 @@ class Actions(object):
     @staticmethod
     def check_credentials():
         """This function checks the json for username and password."""
-        if data["user"] == "username":
+        if DATA["user"] == "username":
             raise CredentialError("You haven't set your credentials. Do so at: " + JSONPATH)
 
 
@@ -121,8 +121,8 @@ class Actions(object):
         """Here thar be FTP lads!"""
         print('Upload sequence initiated. Connecting to Weather Underground...')
         wu_conn = FTP('webcam.wunderground.com')
-        print('Using login credentials for user: ' + data["user"])
-        login = wu_conn.login(data["user"], data["pswd"])
+        print('Using login credentials for user: ' + DATA["user"])
+        login = wu_conn.login(DATA["user"], DATA["pswd"])
         if login[0] == '2':
             print('Login accepted. Uploading...')
             upl = wu_conn.storbinary('STOR image.jpg', open(OUTPATH, 'rb'))
