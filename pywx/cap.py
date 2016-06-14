@@ -15,19 +15,15 @@ Action file for pywx.
 from __future__ import print_function
 import os
 import os.path
-from ftplib import FTP
 import imghdr
 import json
+from ftplib import FTP
+from datetime import datetime
 from subprocess import call, STDOUT
 try:
     from subprocess import DEVNULL
 except ImportError:
     DEVNULL = open(os.devnull, 'wb')
-
-print('pywx image utility v0.0.1')
-print('(c) 2016 Ian Nesbitt')
-print('Mozilla Public License (MPL) 2.0')
-print('--------------------------------')
 
 WARMUP_TIME = 4
 OUTPUT_DIR = '/tmp/wx/'
@@ -35,6 +31,17 @@ IMAGE_NAME = 'image.jpg'
 OUTPATH = os.path.join(OUTPUT_DIR, IMAGE_NAME)
 BASEPATH = os.path.basename(__file__)
 JSONPATH = os.path.abspath(os.path.join(BASEPATH, "..", "settings.json"))
+NOW = datetime.now()
+YEAR = NOW.strftime('%Y')
+NOW = NOW.strftime('%Y/%m/%d %H:%M:%S %Z')
+
+print('--------------------------------')
+print('(processor time): ' + NOW)
+print('--------------------------------')
+print('pywx image utility v0.0.1')
+print('(c) ' + YEAR + ' Ian Nesbitt')
+print('Mozilla Public License (MPL) 2.0')
+print('--------------------------------')
 
 class ImageError(Exception):
     """An exception raised when file is not an appropriate image type."""

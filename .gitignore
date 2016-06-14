@@ -6,3 +6,6 @@ venv/
 
 # the credentials file
 *.json
+
+# logs
+*.log
