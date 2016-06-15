@@ -114,6 +114,8 @@ class Actions(object):
         """This function checks the json for username and password."""
         if DATA["user"] == "username":
             raise CredentialError("You haven't set your credentials. Do so at: " + JSONPATH)
+        else:
+            print("Found username " + DATA["user"] + ", proceeding to FTP.")
 
 
     @staticmethod
@@ -152,7 +154,7 @@ class Actions(object):
         except CredentialError as err_name:
             print('Weather Underground login credentials not set.')
 
-        if err_name != '':
+        if err_name == '':
             try:
                 Actions.upload()
             except Exception as err_name: # pylint: disable=W0703
