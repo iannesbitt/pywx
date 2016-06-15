@@ -23,12 +23,15 @@ Currently supports local USB webcams (via imagesnap) and [Wunderground](https://
     - ***No, this is not secure.*** I recommend running `chmod 600 settings.json` (run as yourself, not root) so that only you can read and write to this file. I also recommend changing your Weather Underground password to something completely unique from all other passwords you use, so that a potential attacker who obtains this information is not able to use it for any other (potentially more important) locations than Wunderground. Sorry about that, you've been warned. **If you're really concerned about it, let me know and I will come up with a safer storage method.**
   - **Update your crontab to run pywx every x minutes**.
     - Run `crontab -e` as yourself (not root) which will open your cron scheduler in the vim editor (unless, like me, you've changed your default editor to nano)
-    - Add the following line, replacing x with an integer >= 1 (your script will run every x minutes): `*/x * * * * ~/pywx/pywx_run cap.Actions.all`
+    - Add the following line, replacing x with an integer >= 1 (your script will run every x minutes): `*/x * * * * ~/pywx/pywx_run cap.Actions.all 2>&1` (the `2>&1` bit tells the cron emailer not to email you the logs, which is nice considering it runs every minute.)
       - Obviously, if you don't unzip pywx to your home folder (`~/`), you'll need to replace the path with the location of the root pywx folder.
-      - If you'd like a log to be kept, you can modify the cron job to append the print output of the program to a file like the following: `*/x * * * * ~/pywx/pywx_run cap.Actions.all >> ~/pywx/pywx.log` 
+      - If you'd like a log to be kept, you can modify the cron job to append the print output of the program to a file like the following: `*/x * * * * ~/pywx/pywx_run cap.Actions.all >> ~/pywx/pywx.log 2>&1`
     - Save the crontab file and quit the editor.
   - Go to your Wunderground webcam page and check that everything has worked.
   - Report bugs!
+
+#### Known bugs
+  - [ImageSnap sometimes likes to remain as a running process in the queue](http://iharder.sourceforge.net/current/macosx/imagesnap/#comment-509757035), taking up gobs of memory and process threads, and making `top -u` just look like a list of times pywx has called imagesnap. I'm not sure why this happens, but I've noticed that if left unchecked, it quickly prevents the cron job from starting at all. (No logs, no images, no upload.) My hacky fix for this would no doubt be frowned upon greatly by Apple, but it does the job. I created another cron job that runs on the same schedule as pywx that effectively kills the imagesnap instance a reasonable amount of time after it is called. It looks something like `*/x * * * * sleep 20 && killall -9 imagesnap`. Basically, it waits 20 seconds, then kills all imagesnap instances. Crude, possibly dangerous, discouraged by Apple, but it's all I've got right now. I welcome any more creative, safe input to resolve this issue. It's possible because it's on Imagesnap's end that a new release would fix it. I'm not holding my breath.
 
 #### Future plans
   - Add security to login credentials.
