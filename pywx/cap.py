@@ -20,7 +20,7 @@ import json
 from ftplib import FTP
 from datetime import datetime
 from subprocess import call, STDOUT
-from pillow import Image
+from PIL import Image
 try:
     from subprocess import DEVNULL
 except ImportError:
