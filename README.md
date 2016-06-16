@@ -6,6 +6,8 @@ Currently supports local USB webcams (via imagesnap) and [Wunderground](https://
   - [Python 2.7.11](https://www.python.org/downloads/release/python-2711/) or [Python 3.5.1](https://www.python.org/downloads/release/python-351/)
   - [ImageSnap v0.2.5](http://iharder.sourceforge.net/current/macosx/imagesnap/)
     - Recommended install using [Homebrew](https://brew.sh)
+  - [pillow v3.2.0](https://pypi.python.org/pypi/Pillow/3.2.0)
+    - `pip install pillow`
   - [six v1.10.0](https://pypi.python.org/pypi/six/1.10.0)
     - `pip install six`
   - [future v0.15.2](https://pypi.python.org/pypi/future/0.15.2)
@@ -15,6 +17,8 @@ Currently supports local USB webcams (via imagesnap) and [Wunderground](https://
   - **Download and unzip** ***pywx*** to the machine you intend to run on (your home directory `~/` would be fine).
   - **Install ImageSnap** using [Homebrew](https://brew.sh).
     - `brew install imagesnap`
+  - **Install other requirements** using pip
+    - `pip install pillow && pip install six && pip install future`
   - **Determine which camera to use**.
     - `imagesnap -l` lists camera choice options.
     - Choose carefully so you don't end up with selfies of your desk chair on Wunderground from your backward-facing built-in iSight or FaceTime Camera. (If you're unsure which is the one you want, test each device with `imagesnap -d 'device name' ~/device_name_test.jpg`, then `open ~/device_name_test.jpg`.)
