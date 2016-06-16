@@ -19,8 +19,8 @@ import imghdr
 import json
 from ftplib import FTP
 from datetime import datetime
-from subprocess import call, STDOUT
 from PIL import Image
+from subprocess import call, STDOUT
 try:
     from subprocess import DEVNULL
 except ImportError:
