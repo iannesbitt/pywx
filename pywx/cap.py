@@ -109,7 +109,7 @@ class Actions(object):
                 raise ImageError(OUTPATH)
             size = str(os.path.getsize(OUTPATH)/1024)
             print('...found ' + size + 'kb ' + imgtype + ' at ' + OUTPATH)
-        if size > 150: # Wunderground only likes images under 150kb. Eventually may move to a loop
+        if size >= 150: # Wunderground only likes images under 150kb. Eventually may move to a loop
             print('Image too large, attempting resize.')
             img = Image.open(OUTPATH)
             img.save(OUTPATH,optimize=True,quality=85)
