@@ -17,7 +17,7 @@ import os
 import os.path
 import imghdr
 import json
-import argparse
+import argparse # pylint: disable=W0611
 from ftplib import FTP
 from datetime import datetime
 from PIL import Image
@@ -28,12 +28,13 @@ try:
 except ImportError:
     DEVNULL = open(os.devnull, 'w')
 
+## This is not ready yet.
 # PARSER = argparse.ArgumentParser()
 # PARSER.add_argument("-v", "--verbose", action="count", default=0,
 #                    help="run in verbose mode")
 # ARGS = PARSER.parse_args()
 
-VERBOSE = 0
+VERBOSE = 1 # temporary solution before argparse is ready
 WARMUP_TIME = 4
 OUTPUT_DIR = '/tmp/wx/'
 IMAGE_NAME = 'image.jpg'
@@ -44,20 +45,21 @@ NOW = datetime.now()
 YEAR = NOW.strftime('%Y')
 NOW = NOW.strftime('%Y/%m/%d %H:%M:%S %Z')
 
-def GetHumanReadable(size,precision=2):
-    suffixes=['B','KB','MB','GB','TB']
-    suffixIndex = 0
+def human_readable_size(size, precision=2):
+    """Filesize is converted from bytes-L format to human-readable string with KB/MB."""
+    suffixes = ['B', 'KB', 'MB', 'GB', 'TB']
+    suffix_index = 0
     while size > 1024:
-        suffixIndex += 1 #increment the index of the suffix
+        suffix_index += 1 #increment the index of the suffix
         size = size/1024.0 #apply the division
-    return "%.*f %s"%(precision,size,suffixes[suffixIndex])
+    return "%.*f %s" % (precision, size, suffixes[suffix_index])
 
 
 if VERBOSE > 0:
     print('--------------------------------')
     print('(processor time): ' + NOW)
     print('--------------------------------')
-    print('pywx image utility v0.0.1')
+    print('pywx image utility v0.0.4')
     print('(c) ' + YEAR + ' Ian Nesbitt')
     print('Mozilla Public License (MPL) 2.0')
     print('--------------------------------')
@@ -110,7 +112,6 @@ class Actions(object):
             if VERBOSE > 0:
                 print('Found ' + OUTPUT_DIR)
                 print('imagesnap recording frame to ' + OUTPATH + ' using ' + DEVICE)
-            pass
         # take a photo and put it in the output directory
         snap = call(['/opt/local/bin/imagesnap', '-w', str(WARMUP_TIME), '-q', '-d', DEVICE, OUTPATH],
                     stdout=DEVNULL, stderr=STDOUT)
@@ -134,11 +135,19 @@ class Actions(object):
             size = str(os.path.getsize(OUTPATH)/1024)
             if VERBOSE > 0:
                 print('...found ' + size + 'kb ' + imgtype + ' at ' + OUTPATH)
-        if size >= 150: # Wunderground only likes images under 150kb. Eventually may move to a loop
             if VERBOSE > 0:
-                print('Image too large, attempting resize.')
+                print('Imprinting time and resizing.')
             img = Image.open(OUTPATH)
-            img.save(OUTPATH,optimize=True,quality=85)
+            draw = ImageDraw.Draw(img)
+            font = ImageFont.truetype("Andale Mono.ttf", 16)
+            x, y = 0, 0
+            imgtext = NOW + 'KCTGREEN35 Central Greenwich, Greenwich, CT'
+            draw.text((x+1, y),imgtext,(0,0,0),font=font)
+            draw.text((x-1, y),imgtext,(0,0,0),font=font)
+            draw.text((x, y+1),imgtext,(0,0,0),font=font)
+            draw.text((x, y-1),imgtext,(0,0,0),font=font)
+            draw.text((x, y),imgtext,(255,255,255),font=font)
+            img.save(OUTPATH, optimize=True, quality=85)
             size = str(os.path.getsize(OUTPATH)/1024)
             if VERBOSE > 0:
                 print('New size: ' + size + 'kb')
@@ -151,7 +160,6 @@ class Actions(object):
         else:
             if VERBOSE > 0:
                 print("Found username " + DATA["user"] + ", proceeding to FTP.")
-            pass
 
     @staticmethod
     def upload():
@@ -169,19 +177,15 @@ class Actions(object):
             if upl[0] == '2':
                 if VERBOSE > 0:
                     print('Upload success.')
-                pass
             else:
                 if VERBOSE > 0:
                     print('Upload failed.')
-                pass
         elif login[0] == '5':
             if VERBOSE > 0:
                 print('Login rejected. Adjust username and password.')
-            pass
         else:
             if VERBOSE > 0:
                 print('Status:' + login)
-            pass
         if VERBOSE > 0:
             print('Exiting FTP connection.')
         wu_conn.quit()
@@ -212,7 +216,7 @@ class Actions(object):
                 now = datetime.now()
                 now = now.strftime('%Y/%m/%d %H:%M:%S %Z')
                 if success:
-                    size = GetHumanReadable(os.path.getsize(OUTPATH))
+                    size = human_readable_size(os.path.getsize(OUTPATH))
                     print(now + " - Success. Size: " + size)
                 else:
                     print(now + " - Failure. Enable verbose mode for details.")
