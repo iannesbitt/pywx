@@ -141,7 +141,7 @@ class Actions(object):
             draw = ImageDraw.Draw(img)
             font = ImageFont.truetype("Andale Mono.ttf", 16)
             x, y = 0, 0
-            imgtext = NOW + 'KCTGREEN35 Central Greenwich, Greenwich, CT'
+            imgtext = NOW + DATA["img_text"]
             draw.text((x+1, y),imgtext,(0,0,0),font=font)
             draw.text((x-1, y),imgtext,(0,0,0),font=font)
             draw.text((x, y+1),imgtext,(0,0,0),font=font)
