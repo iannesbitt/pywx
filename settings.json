@@ -1,5 +1,6 @@
 {
     "user": "username",
     "pswd": "password",
-    "device": "USB2.0 PC CAMERA"
+    "device": "USB2.0 PC CAMERA",
+    "img_text": ""
 }
