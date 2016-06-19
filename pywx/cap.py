@@ -17,15 +17,23 @@ import os
 import os.path
 import imghdr
 import json
+import argparse
 from ftplib import FTP
 from datetime import datetime
 from PIL import Image
+from PIL import ImageFont, ImageDraw
 from subprocess import call, STDOUT
 try:
     from subprocess import DEVNULL
 except ImportError:
     DEVNULL = open(os.devnull, 'w')
 
+# PARSER = argparse.ArgumentParser()
+# PARSER.add_argument("-v", "--verbose", action="count", default=0,
+#                    help="run in verbose mode")
+# ARGS = PARSER.parse_args()
+
+VERBOSE = 0
 WARMUP_TIME = 4
 OUTPUT_DIR = '/tmp/wx/'
 IMAGE_NAME = 'image.jpg'
@@ -36,13 +44,23 @@ NOW = datetime.now()
 YEAR = NOW.strftime('%Y')
 NOW = NOW.strftime('%Y/%m/%d %H:%M:%S %Z')
 
-print('--------------------------------')
-print('(processor time): ' + NOW)
-print('--------------------------------')
-print('pywx image utility v0.0.1')
-print('(c) ' + YEAR + ' Ian Nesbitt')
-print('Mozilla Public License (MPL) 2.0')
-print('--------------------------------')
+def GetHumanReadable(size,precision=2):
+    suffixes=['B','KB','MB','GB','TB']
+    suffixIndex = 0
+    while size > 1024:
+        suffixIndex += 1 #increment the index of the suffix
+        size = size/1024.0 #apply the division
+    return "%.*f %s"%(precision,size,suffixes[suffixIndex])
+
+
+if VERBOSE > 0:
+    print('--------------------------------')
+    print('(processor time): ' + NOW)
+    print('--------------------------------')
+    print('pywx image utility v0.0.1')
+    print('(c) ' + YEAR + ' Ian Nesbitt')
+    print('Mozilla Public License (MPL) 2.0')
+    print('--------------------------------')
 
 class ImageError(Exception):
     """An exception raised when file is not an appropriate image type."""
@@ -79,26 +97,32 @@ class Actions(object):
     def take():
         """This function looks for the output directory and creats if necessary
         then calls imagesnap which takes a photo and saves it there."""
-        print('Looking for output directory ' + OUTPUT_DIR)
+        if VERBOSE > 0:
+            print('Looking for output directory ' + OUTPUT_DIR)
         # make sure the dir exists
         if not os.path.isdir(OUTPUT_DIR):
-            print(OUTPUT_DIR + ' does not exist. Attempting to create...')
+            if VERBOSE > 0:
+                print(OUTPUT_DIR + ' does not exist. Attempting to create...')
             os.makedirs(OUTPUT_DIR)
-            print('Successfully created ' + OUTPUT_DIR)
+            if VERBOSE > 0:
+                print('Successfully created ' + OUTPUT_DIR)
         else:
-            print('Found ' + OUTPUT_DIR)
-
-        print('imagesnap recording frame to ' + OUTPATH + ' using ' + DEVICE)
+            if VERBOSE > 0:
+                print('Found ' + OUTPUT_DIR)
+                print('imagesnap recording frame to ' + OUTPATH + ' using ' + DEVICE)
+            pass
         # take a photo and put it in the output directory
         snap = call(['/opt/local/bin/imagesnap', '-w', str(WARMUP_TIME), '-q', '-d', DEVICE, OUTPATH],
                     stdout=DEVNULL, stderr=STDOUT)
-        print('Errors: ' + str(snap))
-        print('...done.')
+        if VERBOSE > 0:
+            print('Bash call errors: ' + str(snap))
+            print('...done.')
 
     @staticmethod
     def check_file():
         """This function does some magic to make sure it's an image."""
-        print('Checking image recorded correctly...')
+        if VERBOSE > 0:
+            print('Checking image recorded correctly...')
         # make sure image exists
         if not os.path.exists(OUTPATH):
             print('Cannot find ' + OUTPATH)
@@ -108,13 +132,16 @@ class Actions(object):
             if imgtype != 'jpeg':
                 raise ImageError(OUTPATH)
             size = str(os.path.getsize(OUTPATH)/1024)
-            print('...found ' + size + 'kb ' + imgtype + ' at ' + OUTPATH)
+            if VERBOSE > 0:
+                print('...found ' + size + 'kb ' + imgtype + ' at ' + OUTPATH)
         if size >= 150: # Wunderground only likes images under 150kb. Eventually may move to a loop
-            print('Image too large, attempting resize.')
+            if VERBOSE > 0:
+                print('Image too large, attempting resize.')
             img = Image.open(OUTPATH)
             img.save(OUTPATH,optimize=True,quality=85)
             size = str(os.path.getsize(OUTPATH)/1024)
-            print('New size: ' + size + 'kb')
+            if VERBOSE > 0:
+                print('New size: ' + size + 'kb')
 
     @staticmethod
     def check_credentials():
@@ -122,34 +149,48 @@ class Actions(object):
         if DATA["user"] == "username":
             raise CredentialError("You haven't set your credentials. Do so at: " + JSONPATH)
         else:
-            print("Found username " + DATA["user"] + ", proceeding to FTP.")
-
+            if VERBOSE > 0:
+                print("Found username " + DATA["user"] + ", proceeding to FTP.")
+            pass
 
     @staticmethod
     def upload():
         """Here thar be FTP lads!"""
-        print('Upload sequence initiated. Connecting to Weather Underground...')
+        if VERBOSE > 0:
+            print('Upload sequence initiated. Connecting to Weather Underground...')
         wu_conn = FTP('webcam.wunderground.com')
-        print('Using login credentials for user: ' + DATA["user"])
+        if VERBOSE > 0:
+            print('Using login credentials for user: ' + DATA["user"])
         login = wu_conn.login(DATA["user"], DATA["pswd"])
         if login[0] == '2':
-            print('Login accepted. Uploading...')
+            if VERBOSE > 0:
+                print('Login accepted. Uploading...')
             upl = wu_conn.storbinary('STOR image.jpg', open(OUTPATH, 'rb'))
             if upl[0] == '2':
-                print('Upload success.')
+                if VERBOSE > 0:
+                    print('Upload success.')
+                pass
             else:
-                print('Upload failed.')
+                if VERBOSE > 0:
+                    print('Upload failed.')
+                pass
         elif login[0] == '5':
-            print('Login rejected. Adjust username and password.')
+            if VERBOSE > 0:
+                print('Login rejected. Adjust username and password.')
+            pass
         else:
-            print('Status:' + login)
-        print('Exiting FTP connection.')
+            if VERBOSE > 0:
+                print('Status:' + login)
+            pass
+        if VERBOSE > 0:
+            print('Exiting FTP connection.')
         wu_conn.quit()
 
     @staticmethod
     def all():
         """This function does it all."""
         err_name = ''
+        success = False
         try:
             Actions.take()
             Actions.check_file()
@@ -164,5 +205,15 @@ class Actions(object):
         if err_name == '':
             try:
                 Actions.upload()
+                success = True
             except Exception as err_name: # pylint: disable=W0703
                 print(err_name)
+            finally:
+                now = datetime.now()
+                now = now.strftime('%Y/%m/%d %H:%M:%S %Z')
+                if success:
+                    size = GetHumanReadable(os.path.getsize(OUTPATH))
+                    print(now + " - Success. Size: " + size)
+                else:
+                    print(now + " - Failure. Enable verbose mode for details.")
+
