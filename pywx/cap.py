@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # This Source Code Form is subject to the terms of the Mozilla Public
@@ -15,13 +15,14 @@ Action file for pywx.
 from __future__ import print_function
 import os
 import os.path
+import platform
 import imghdr
 import json
 import argparse # pylint: disable=W0611
 from ftplib import FTP
 from datetime import datetime
 from PIL import Image
-from PIL import ImageFont, ImageDraw
+#from PIL import ImageFont, ImageDraw
 from subprocess import call, STDOUT
 try:
     from subprocess import DEVNULL
@@ -34,8 +35,10 @@ except ImportError:
 #                    help="run in verbose mode")
 # ARGS = PARSER.parse_args()
 
-VERBOSE = 1 # temporary solution before argparse is ready
-WARMUP_TIME = 4
+PLATFORM = platform.platform()
+VERBOSE = 0 # temporary solution before argparse is ready
+WARMUP_TIME = 4 # seconds
+FRAMERATE = 19 # fps
 OUTPUT_DIR = '/tmp/wx/'
 IMAGE_NAME = 'image.jpg'
 OUTPATH = os.path.join(OUTPUT_DIR, IMAGE_NAME)
@@ -82,6 +85,12 @@ class CredentialError(Exception):
         self.path = path
     def __str__(self):
         return repr(self.path)
+class CompatibilityError(Exception):
+    """An exception raised on an incompatible operating system."""
+    def __init__(self, path): # pylint: disable=W0231
+        self.path = path
+    def __str__(self):
+        return repr(self.path)
 
 try:
     with open(JSONPATH) as j:
@@ -111,10 +120,22 @@ class Actions(object):
         else:
             if VERBOSE > 0:
                 print('Found ' + OUTPUT_DIR)
-                print('imagesnap recording frame to ' + OUTPATH + ' using ' + DEVICE)
+                print('Waiting' + WARMUP_TIME + 'seconds then recording frame to ' + OUTPATH + ' using ' + DEVICE)
         # take a photo and put it in the output directory
-        snap = call(['/opt/local/bin/imagesnap', '-w', str(WARMUP_TIME), '-q', '-d', DEVICE, OUTPATH],
-                    stdout=DEVNULL, stderr=STDOUT)
+        # are we on a Mac?
+        if PLATFORM.startswith('Darwin'):
+            snap = call(['/opt/local/bin/imagesnap', '-w', str(WARMUP_TIME), '-q', '-d', DEVICE, OUTPATH],
+                        stdout=DEVNULL, stderr=STDOUT)
+        # else for linux:
+        elif PLATFORM.startswith('Linux'):
+            skip_frames = WARMUP_TIME * FRAMERATE
+            snap = call(['/usr/bin/fswebcam', '-S', str(skip_frames), '-r', '640x480', '--top-banner',
+                        '--title', DATA["img_text"], '--jpeg', '95', '--line-colour', '#ff000000',
+                        OUTPATH], stdout=DEVNULL, stderr=STDOUT)
+        # Windows or something else. Run away!
+        else:
+            snap = 'Unfamilliar operating system. Could not call camera command. No image taken.'
+            raise CompatibilityError("OS is not Linux or OSX. Incompatible with others in current version.")
         if VERBOSE > 0:
             print('Bash call errors: ' + str(snap))
             print('...done.')
@@ -138,15 +159,17 @@ class Actions(object):
             if VERBOSE > 0:
                 print('Imprinting time and resizing.')
             img = Image.open(OUTPATH)
-            draw = ImageDraw.Draw(img)
-            font = ImageFont.truetype("Andale Mono.ttf", 16)
-            x, y = 0, 0
-            imgtext = NOW + DATA["img_text"]
-            draw.text((x+1, y),imgtext,(0,0,0),font=font)
-            draw.text((x-1, y),imgtext,(0,0,0),font=font)
-            draw.text((x, y+1),imgtext,(0,0,0),font=font)
-            draw.text((x, y-1),imgtext,(0,0,0),font=font)
-            draw.text((x, y),imgtext,(255,255,255),font=font)
+            if PLATFORM.startswith('Darwin'):
+                # Commented things are text things which we don't need with fswebcam
+                draw = ImageDraw.Draw(img)
+                font = ImageFont.truetype("Andale Mono.ttf", 16)
+                x, y = 0, 0
+                imgtext = NOW + DATA["img_text"]
+                draw.text((x+1, y),imgtext,(0,0,0),font=font)
+                draw.text((x-1, y),imgtext,(0,0,0),font=font)
+                draw.text((x, y+1),imgtext,(0,0,0),font=font)
+                draw.text((x, y-1),imgtext,(0,0,0),font=font)
+                draw.text((x, y),imgtext,(255,255,255),font=font)
             img.save(OUTPATH, optimize=True, quality=85)
             size = str(os.path.getsize(OUTPATH)/1024)
             if VERBOSE > 0:
@@ -220,4 +243,3 @@ class Actions(object):
                     print(now + " - Success. Size: " + size)
                 else:
                     print(now + " - Failure. Enable verbose mode for details.")
-
