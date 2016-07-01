@@ -36,6 +36,7 @@ Currently supports local USB webcams (via imagesnap) and [Wunderground](https://
   - Report bugs!
 
 #### Known bugs
+  - If you are running OS X and have a homebrew-installed version of Python, you will need to change the shebang (look it up) at the beginning of both `pywx_run` and `pywx/cap.py` from `#!/usr/bin/python` to `#!/usr/local/bin/python`.
   - [ImageSnap sometimes likes to remain as a running process in the queue](http://iharder.sourceforge.net/current/macosx/imagesnap/#comment-509757035), taking up gobs of memory and process threads, and making `top -u` just look like a list of times pywx has called imagesnap. I'm not sure why this happens, but I've noticed that if left unchecked, it quickly prevents the cron job from starting at all. (No logs, no images, no upload.) My hacky fix for this would no doubt be frowned upon greatly by Apple, but it does the job. I created another cron job that runs on the same schedule as pywx that effectively kills the imagesnap instance a reasonable amount of time after it is called. It looks something like `*/x * * * * sleep 20 && killall -15 imagesnap` (you could also add these commands to the end of your first cron job using &&). Basically, it waits 20 seconds, then kills all imagesnap instances. Crude, possibly dangerous, discouraged by Apple, but it's all I've got right now. I welcome any more creative, safe input to resolve this issue. It's possible because it's on Imagesnap's end that a new release would fix it. I'm not holding my breath.
 
 #### Future plans
