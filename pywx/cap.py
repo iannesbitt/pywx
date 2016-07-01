@@ -134,7 +134,7 @@ class Actions(object):
                         OUTPATH], stdout=DEVNULL, stderr=STDOUT)
         # Windows or something else. Run away!
         else:
-            snap = 'Unfamilliar operating system. Could not call camera command. No image taken.'
+            snap = 1
             raise CompatibilityError("OS is not Linux or OSX. Incompatible with others in current version.")
         if VERBOSE > 0:
             print('Bash call errors: ' + str(snap))
@@ -228,6 +228,8 @@ class Actions(object):
             print('The image at ' + err_name.path + ' is not jpeg.')
         except CredentialError as err_name:
             print('Weather Underground login credentials not set.')
+        except CompatibilityError as err_name:
+            print('Unfamilliar operating system. Could not call camera command. No image taken.')
 
         if err_name == '':
             try:
