@@ -10,11 +10,9 @@ Currently supports local USB webcams (via imagesnap) and [Wunderground](https://
     - `pip install six`
   - [future v0.15.2](https://pypi.python.org/pypi/future/0.15.2)
     - `pip install future`
-On Mac:
-  - [ImageSnap v0.2.5](http://iharder.sourceforge.net/current/macosx/imagesnap/)
+  - On Mac: [ImageSnap v0.2.5](http://iharder.sourceforge.net/current/macosx/imagesnap/)
     - Recommended install using [Homebrew](https://brew.sh)
-On Linux:
-  - [fswebcam](https://www.sanslogic.co.uk/fswebcam/)
+  - On Linux: [fswebcam](https://www.sanslogic.co.uk/fswebcam/)
     - Available on Aptitude, the Linux package manager
 
 #### Setup
