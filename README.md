@@ -4,19 +4,25 @@ Currently supports local USB webcams (via imagesnap) and [Wunderground](https://
 
 #### Requirements
   - [Python 2.7.11](https://www.python.org/downloads/release/python-2711/) or [Python 3.5.1](https://www.python.org/downloads/release/python-351/)
-  - [ImageSnap v0.2.5](http://iharder.sourceforge.net/current/macosx/imagesnap/)
-    - Recommended install using [Homebrew](https://brew.sh)
   - [pillow v3.2.0](https://pypi.python.org/pypi/Pillow/3.2.0)
     - `pip install pillow`
   - [six v1.10.0](https://pypi.python.org/pypi/six/1.10.0)
     - `pip install six`
   - [future v0.15.2](https://pypi.python.org/pypi/future/0.15.2)
     - `pip install future`
+On Mac:
+  - [ImageSnap v0.2.5](http://iharder.sourceforge.net/current/macosx/imagesnap/)
+    - Recommended install using [Homebrew](https://brew.sh)
+On Linux:
+  - [fswebcam](https://www.sanslogic.co.uk/fswebcam/)
+    - Available on Aptitude, the Linux package manager
 
 #### Setup
   - **Download and unzip** ***pywx*** to the machine you intend to run on (your home directory `~/` would be fine).
-  - **Install ImageSnap** using [Homebrew](https://brew.sh).
+  - On Mac: **Install ImageSnap** using [Homebrew](https://brew.sh).
     - `brew install imagesnap`
+  - On Linux: **Install fswebcam** using `apt-get`
+    - `sudo apt-get install fswebcam`
   - **Install other requirements** using pip
     - `pip install pillow && pip install six && pip install future`
   - **Determine which camera to use**.
