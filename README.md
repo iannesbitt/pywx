@@ -1,6 +1,6 @@
 # pywx
 ## An embarassingly simple Wunderground webcam image getter and uploader
-Currently supports local USB webcams (via imagesnap) and [Wunderground](https://www.wunderground.com/webcams/signup.html) as an endpoint. Relatively easy to install using the OS X command line.
+Currently supports local USB webcams (via imagesnap) and [Wunderground](https://www.wunderground.com/webcams/signup.html) as an endpoint. Relatively easy to install using the OS X or Linux command line.
 
 #### Requirements
   - [Python 2.7.11](https://www.python.org/downloads/release/python-2711/) or [Python 3.5.1](https://www.python.org/downloads/release/python-351/)
