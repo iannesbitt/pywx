@@ -36,10 +36,10 @@ except ImportError:
 # ARGS = PARSER.parse_args()
 
 PLATFORM = platform.platform()
-VERBOSE = 0 # temporary solution before argparse is ready
-WARMUP_TIME = 4 # seconds
-FRAMERATE = 19 # fps
-OUTPUT_DIR = '/tmp/wx/'
+VERBOSE = 1 # temporary solution before argparse is ready
+WARMUP_TIME = 1 # seconds
+FRAMERATE = 16 # fps
+OUTPUT_DIR = '/home/pi/bin/pywx/img'
 IMAGE_NAME = 'image.jpg'
 OUTPATH = os.path.join(OUTPUT_DIR, IMAGE_NAME)
 BASEPATH = os.path.dirname(os.path.abspath(__file__))
@@ -120,7 +120,7 @@ class Actions(object):
         else:
             if VERBOSE > 0:
                 print('Found ' + OUTPUT_DIR)
-                print('Waiting' + WARMUP_TIME + 'seconds then recording frame to ' + OUTPATH + ' using ' + DEVICE)
+                print('Waiting ' + str(WARMUP_TIME) + ' seconds then recording frame to ' + OUTPATH + ' using ' + DEVICE)
         # take a photo and put it in the output directory
         # are we on a Mac?
         if PLATFORM.startswith('Darwin'):
@@ -129,7 +129,8 @@ class Actions(object):
         # else for linux:
         elif PLATFORM.startswith('Linux'):
             skip_frames = WARMUP_TIME * FRAMERATE
-            snap = call(['/usr/bin/fswebcam', '-S', str(skip_frames), '-r', '640x480', '--top-banner',
+            snap = call(['/usr/bin/fswebcam', '-d', '/dev/video0', '-p', 'YUYV', '-D',
+                        str(WARMUP_TIME), '-S', str(skip_frames), '-r', '640x480', '--top-banner',
                         '--title', DATA["img_text"], '--jpeg', '95', '--line-colour', '#ff000000',
                         OUTPATH], stdout=DEVNULL, stderr=STDOUT)
         # Windows or something else. Run away!
