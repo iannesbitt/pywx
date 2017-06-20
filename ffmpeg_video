@@ -1,0 +1,37 @@
+#! /bin/bash
+
+# Written by Ian Nesbitt, 2017. Distributed under MIT License.
+# Converts set of images to timelapse and copies to web location
+# Requires ffmpeg (see https://github.com/ccrisan/motioneye/wiki/Install-On-Raspbian)
+
+# the image repository
+LOC='' ## (your working directory, the one with the images)
+## LOC='/home/pi/bin/pywx/img/arch'
+# the web repository
+DEST='' ## (your output directory)
+## DEST='/var/www/site/media'
+
+if [ -d "$LOC/$(date +\%F)" ]; then
+  cd $LOC/$(date +\%F)
+
+  # writes list of files, numbers each list item,
+  # stores number and filename as vars, then renames files with numbering.
+  # numbering is in %d format starting at 1.jpg
+  ls | cat -n | while read n f; do cp "$f" "$n.jpg"; done
+  # converts filenames with %d format to 30fps mp4 starting at 1.jpg
+  ffmpeg -start_number 1 -r 30  -i \%d.jpg -c:v libx264 ../yesterday.mp4
+
+  # using the assumed noon image as the cover image
+  # not a huge deal if not there; video will default to first frame
+  if [ -d "361.jpg" ]; then
+    cp 361.jpg $DEST/cover.jpg
+  fi
+
+  # removes jpgs
+  rm *.jpg
+  # moves .mp4 to web folder
+  cp ../yesterday.mp4 $DEST
+  # removes current datestamped folder
+  cd ../; rm -r $(date +\%F)/
+
+fi
